@@ -1,0 +1,4 @@
+interface:
+  display_name: "Worktree Workflow"
+  short_description: "Define and verify safe multi-worktree project requirements"
+  default_prompt: "Use $worktree-workflow to audit or establish this project's multi-worktree development workflow."
