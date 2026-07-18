@@ -1,47 +1,44 @@
-# Audit checklist
+# 审计清单
 
-## Discover
+## 发现
 
-- Locate applicable repository instructions from the target path upward.
-- Inspect the repository status before planning changes.
-- Inventory shared and tool-specific instructions, skills, adapters, scripts, CI, tests, hooks, and human documentation.
-- Identify the project's supported automation runtime and entrypoint naming.
-- Find explicit OS and agent support declarations and record their source.
-- Identify local-only, generated, ignored, sensitive, and tool-managed paths.
+- 从目标路径向上查找适用的仓库指令。
+- 规划修改前检查仓库状态。
+- 盘点共享和工具专属指令、skill、adapter、脚本、CI、测试、hook 和人工文档。
+- 确认项目支持的自动化 runtime 和入口命名。
+- 定位 Codex 和 Claude 的项目本地 discovery adapter。
+- 识别仅限本地、自动生成、已忽略、敏感和工具管理的路径。
 
-## Audit ownership
+## 审计 ownership
 
-- Identify the canonical body for every shared workflow.
-- Compare adapters with their canonical target.
-- Find copied mirrors, orphan adapters, adapter-only behavior, and broken load paths.
-- Check whether project instructions duplicate skills or perform discovery routing without a tool requirement.
-- Check whether human-facing conventions live in the project's documentation system.
-- Confirm that tool-specific extensions are labeled and separated from the portable core.
+- 找出每个共享工作流的 canonical body。
+- 比较 adapter 及其 canonical target。
+- 找出复制镜像、孤立 adapter、只存在于 adapter 的行为和失效加载路径。
+- 检查项目指令是否重复 skill，或在工具没有要求时承担 discovery 路由。
+- 检查面向人的约定是否位于项目文档系统中。
+- 确认工具专属扩展已明确标注，并与可移植核心分离。
 
-## Audit automation
+## 审计自动化
 
-- Classify new and existing harness automation by runtime and platform support.
-- Find `.sh`, `.ps1`, batch, shell-dependent quoting, hard-coded path separators, executable-bit assumptions, symlink/junction requirements, and OS-specific process control.
-- Distinguish harness automation from product or operational scripts outside the requested scope.
-- Locate equivalent project checks before proposing a new checker.
-- Inspect CI and hooks without assuming their names, tiers, or ownership.
+- 按 runtime 和平台支持情况检查新旧 harness 自动化。
+- 查找 `.sh`、`.ps1`、batch、依赖 shell 的 quoting、硬编码路径分隔符、可执行位假设、symlink/junction 要求和 OS 专属进程控制。
+- 区分 harness 自动化与范围外的产品或运维脚本。
+- 提议新增 checker 前，先查找项目已有的等效检查。
+- 检查 CI 和 hook，不预设名称、层级或 ownership。
 
-## Audit evidence
+## 审计验证
 
-- Separate official mechanism documentation from observed project behavior.
-- Record which OS and agent combinations were actually exercised.
-- Record agent and OS versions, repository commit or dirty state, and verification date.
-- Mark missing declarations as unknown and ask the user to set the required scope.
+- 确认两个 adapter 都能加载完整 canonical body。
+- 项目已有的相关验证，其影响处于任务范围内时直接运行。
+- 记录无法执行的具体检查。
 
-## Stop conditions
+## 停止条件
 
-Stop and discuss before implementation when:
+出现以下情况时，实施前先讨论：
 
-- canonical ownership or migration direction is ambiguous;
-- a required tool lacks a project-local discovery mechanism;
-- a change would alter established CI, hook, build, or documentation conventions;
-- a migration is destructive or would overwrite user content;
-- verification needs side effects beyond the approved boundary;
-- required OS or agent scope is undeclared;
-- the project's runtime cannot express the needed automation portably.
-
+- canonical ownership 或迁移方向不明确；
+- Codex 或 Claude 缺少可用的项目本地 discovery 机制；
+- 修改会改变既有 CI、hook、构建或文档约定；
+- 迁移具有破坏性或会覆盖用户内容；
+- 验证需要执行范围外的破坏性、外部、凭据相关或生产操作；
+- 项目 runtime 无法以跨平台方式表达所需自动化。

@@ -1,41 +1,46 @@
-# Agent mechanisms
+# Agent 机制
 
-## Select a mechanism
+## 默认项目结构
 
-For each target agent:
+项目没有既有 skill 结构时，使用以下默认布局：
 
-1. Find the current official project-local instruction and skill discovery mechanisms.
-2. Record the official source, product version, and lookup behavior.
-3. Prefer native import or load semantics over filesystem links.
-4. Create the smallest adapter that the mechanism permits.
-5. Test discovery and complete canonical loading in the actual agent.
+```text
+<project>/
+├── .ai/skills/<skill>/SKILL.md
+├── .agents/skills/<skill>/SKILL.md
+└── .claude/skills/<skill>/SKILL.md
+```
 
-Do not choose a directory from memory or another tool's convention. Agent discovery locations and supported metadata can change by version.
+- `.ai/skills/<skill>/` 保存唯一 canonical body，以及该 skill 实际需要的 references、scripts 或 assets。
+- `.agents/skills/<skill>/SKILL.md` 是 Codex discovery adapter。
+- `.claude/skills/<skill>/SKILL.md` 是 Claude discovery adapter。
+- 两个 adapter 只保留各自 discovery 所需的 metadata，以及加载 `.ai/skills/<skill>/SKILL.md` 的指令。
 
-## Keep evidence separate
+项目已有明确结构时，沿用既有结构，但保持相同 ownership 边界。人工文档的位置和名称遵循项目自己的文档规范。
 
-Maintain two evidence fields for every mechanism:
+## 选择机制
 
-| Evidence | Meaning |
-| --- | --- |
-| Official capability | The vendor documents the mechanism for the recorded version |
-| Project verification | The recorded agent version discovered the project adapter and loaded the canonical workflow in this repository state |
+对于 Codex 和 Claude：
 
-Official capability does not prove the project wiring works. A successful project test does not establish support for other versions or operating systems.
+1. 使用该 agent 当前的项目本地指令和 skill discovery 机制。
+2. 优先使用原生 import 或 load 语义，不依赖文件系统链接。
+3. 创建该机制允许的最小 adapter。
+4. 确认 adapter 能够解析并加载完整 canonical body。
 
-## Adapter contract
+默认布局仍需用当前 Codex 和 Claude 版本验证。若某个 agent 的项目本地机制不再支持对应 adapter，先说明具体差异并与用户讨论，不静默改用复制正文或文件系统链接。
 
-An adapter may contain:
+## Adapter 契约
 
-- required discovery frontmatter or metadata;
-- a short tool-native instruction that loads the canonical skill;
-- unavoidable tool-specific invocation controls, clearly labeled as tool-specific.
+adapter 可以包含：
 
-An adapter must not become a second workflow body. If a tool cannot load the canonical body from a thin adapter, record that capability as unsupported or unknown and discuss a project-specific trade-off with the user.
+- discovery 所需的 frontmatter 或 metadata；
+- 加载 canonical skill 的简短工具原生指令；
+- 无法避免的工具专属调用控制，并明确标注为工具专属。
 
-## Installation boundary
+adapter 不能成为第二份工作流正文。如果工具无法通过 thin adapter 加载 canonical body，记录该能力不受支持或未知，并与用户讨论项目专属取舍。
 
-Keep the reusable skill package independent from installation adapters. Generate or maintain discovery entries when installing into a target project, based on that project's required agents and their current official mechanisms.
+## 安装边界
 
-User-global installation may aid one developer, but it does not count as a project-local harness capability.
+可复用 skill package 与安装 adapter 保持独立。安装到目标项目时，生成或维护 Codex 和 Claude 的 discovery 入口。
 
+用户全局安装可以辅助单个开发者，但不算项目本地 harness 能力。

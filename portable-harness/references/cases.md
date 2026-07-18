@@ -1,33 +1,29 @@
-# Cases
+# 典型情况
 
-## Existing CI already validates the harness
+## 现有 CI 已验证 harness
 
-Map the contract to existing project checks and tests. Add no checker merely to standardize naming. Record where the coverage contract is maintained.
+将契约映射到项目已有检查和测试。不要仅为统一命名而新增 checker。记录覆盖契约的维护位置。
 
-## Project has custom CI tiers
+## 项目有自定义 CI 层级
 
-Use the project's tier names and dependency rules. Place harness validation where its cost and purpose fit the existing convention. Do not impose a lite/full model or require one tier to include another.
+使用项目自身的层级名称和依赖规则。根据成本和用途，将 harness 验证放入符合现有约定的位置。不要强加 lite/full 模型，也不要要求一个层级必须包含另一个层级。
 
-## Project shape differs from prior examples
+## 项目结构与既有示例不同
 
-Derive its actual build and runtime model. A library, CLI, desktop application, plugin, firmware project, data pipeline, or monorepo may require different validation and no service orchestration.
+推导项目实际的构建和 runtime 模型。库、CLI、桌面应用、插件、固件项目、数据管道或 monorepo 可能需要不同的验证方式，也可能不需要服务编排。
 
-## Agent supports only user-global skills
+## Codex 或 Claude 无法加载中立的 canonical body
 
-Record user-global support separately. Mark the agent unsupported or unknown for project-local harness delivery unless the project and user explicitly adopt another reproducible mechanism.
+停止并说明具体限制。生成镜像、复制正文或改为工具专属 ownership 都会改变 canonical source 契约，需要用户明确决定。
 
-## Agent cannot load a neutral canonical body
+## 仓库已有平台特化脚本
 
-Stop and present the concrete limitation. Options such as generated mirrors, duplicated bodies, or tool-specific ownership change the canonical-source contract and require an explicit user decision.
+审计范围限定在 harness 自动化。除非用户明确扩展范围，否则保持现有产品和运维脚本不变。
 
-## Repository already contains platform-specific scripts
+## 验证命令存在隐藏副作用
 
-Restrict the audit to harness automation. Keep existing product and operational scripts unchanged unless the user explicitly expands scope.
+常规本地验证的影响处于任务范围内时直接运行。破坏性、外部、凭据相关或生产操作必须先询问用户。
 
-## Verification command has hidden side effects
+## 实施期间工作区发生变化
 
-Treat it according to the discovered effects, even when it is the project's official CI or test command. Run it only after the Plan names and authorizes those effects and their cleanup.
-
-## Working tree changes during implementation
-
-Stop at the first failed precondition or unexpected workspace delta. Preserve all uncertain changes, rebuild the baseline, revise the Plan, and ask for confirmation before continuing.
+保留意外变化并重新检查受影响路径。ownership 明确时继续，否则询问用户。

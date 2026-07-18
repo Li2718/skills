@@ -1,42 +1,44 @@
 ---
 name: portable-harness
-description: Audit, design, migrate, maintain, and verify a project-local AI development harness that works across the operating systems and AI agents required by the project. Use when creating or changing shared agent instructions, skills and discovery adapters, cross-platform project automation, CI or hook integration for harness checks, human-facing AI tooling conventions, or when assessing whether a repository's harness is genuinely portable and cross-agent.
+description: 审计、设计、迁移、维护和验证项目本地 AI 开发 harness，使其可由 Codex 和 Claude 在 Windows、macOS、Linux 上使用。适用于创建或修改共享 agent 指令、skill、discovery adapter、跨平台 harness 自动化、harness 检查的 CI 或 hook 集成，以及面向人的 AI 工具约定。
 ---
 
 # Portable Harness
 
-Build the harness from the target project's own conventions. Keep the reusable workflow tool-neutral and make every portability claim evidence-based.
+根据目标项目自身的约定构建 harness。保持可复用工作流只有一个 canonical body，可供 Codex 和 Claude 使用，并且不包含平台特化自动化。
 
-## Required references
+## 必读参考资料
 
-Read these before planning or changing a harness:
+规划或修改 harness 前，阅读：
 
-- [core-contract.md](references/core-contract.md) for ownership, canonical-source, documentation, and automation rules.
-- [safety-boundaries.md](references/safety-boundaries.md) before running commands or editing files.
+- [core-contract.md](references/core-contract.md)：ownership、canonical source、文档和自动化规则。
+- [safety-boundaries.md](references/safety-boundaries.md)：运行命令或编辑文件前的边界。
 
-Read the remaining references when their phase applies:
+进入对应阶段时，阅读：
 
-- [audit-checklist.md](references/audit-checklist.md) during discovery and audit.
-- [agent-mechanisms.md](references/agent-mechanisms.md) when selecting or validating discovery adapters.
-- [verification.md](references/verification.md) when defining support scope, verification, or delivery claims.
-- [cases.md](references/cases.md) when a project presents an ambiguous migration or ownership case.
+- [audit-checklist.md](references/audit-checklist.md)：discovery 和审计。
+- [agent-mechanisms.md](references/agent-mechanisms.md)：选择或验证 discovery adapter。
+- [verification.md](references/verification.md)：定义支持范围、验证和交付结论。
+- [cases.md](references/cases.md)：处理有歧义的迁移或 ownership 情况。
 
-## Workflow
+## 工作流
 
-1. **Discover** the project shape, repository rules, existing instructions and skills, automation runtime, package or build system, CI, tests, hooks, documentation conventions, supported operating systems, and target AI agents.
-2. **Audit** ownership, duplicated rules, canonical sources, discovery adapters, platform coupling, validation coverage, and current evidence.
-3. **Plan** exact file changes, migration treatment, command side effects, authorization needs, verification matrix, and stop conditions.
-4. **Discuss** any material trade-off, missing project capability, destructive migration, unclear ownership, or proposed change to an established project convention. Continue only after the user decides.
-5. **Implement** only the approved scope. Preserve unrelated and concurrent user changes.
-6. **Verify** structure, real agent discovery and canonical loading, and the target project's own required validation entrypoints.
-7. **Report** the changed files, derived project conventions, exact commands and results, support matrix, unverified items, risks, and delivery state.
+1. **发现**：了解项目结构、仓库规则、现有指令和 skill、自动化 runtime、包或构建系统、CI、测试、hook 和文档约定。
+2. **审计**：检查 ownership、重复规则、canonical source、Codex 和 Claude discovery adapter、平台耦合和验证覆盖。
+3. **规划**：明确文件改动、迁移处理、验证方式和重大取舍。
+4. **讨论**：遇到重大取舍、项目能力缺失、破坏性迁移、ownership 不清晰，或需要改变既有项目约定时，由用户决定后继续。
+5. **实施**：只实施已批准的范围，保留无关改动和用户的并发改动。
+6. **验证**：检查结构、真实的 agent discovery 和 canonical body 加载，以及目标项目要求的验证入口。
+7. **报告**：说明修改文件、验证命令及结果、剩余平台耦合和未解决风险。
 
-## Operating rules
+## 执行规则
 
-- Derive CI names and relationships from the project. Do not impose a fixed CI or hook model.
-- Derive the project shape and topology from evidence. Do not impose a runtime, service, data, container, or package-management model.
-- Keep shared workflow content canonical. Keep each tool adapter limited to native discovery metadata and a load instruction.
-- Prefer project-local delivery. Do not count user-only installation as project harness support.
-- Treat checkers as optional. Reuse equivalent project validation when it exists; otherwise make any new checker follow the project's runtime, naming, and CI conventions.
-- Do not add platform-specific harness automation such as `.sh` or `.ps1`. Existing platform-specific product scripts remain out of scope unless the user expands the task.
-- Do not claim portability from static inspection. Apply the evidence and status rules in [verification.md](references/verification.md).
+- 从项目中推导 CI 名称和关系，不强加固定的 CI 或 hook 模型。
+- 根据证据确定项目结构和拓扑，不强加 runtime、服务、数据、容器或包管理模型。
+- 共享工作流只保留一个 canonical body。每个工具的 adapter 仅包含原生 discovery metadata 和加载指令。
+- 优先项目本地交付。只安装到用户环境不算项目 harness 支持。
+- checker 是可选项。优先复用项目已有的等效验证；确需新增时，遵循项目的 runtime、命名和 CI 约定。
+- 支持 Windows、macOS 和 Linux，不承诺具体发行版。
+- 支持 Codex 和 Claude。除非用户明确扩展范围，否则其他 agent 不在范围内。
+- harness 自动化不得包含 `.ps1`、`.bat`、`.cmd`、`.sh` 等平台特化入口。除非用户明确扩展任务，否则项目已有的平台特化产品脚本不在范围内。
+- 通过静态平台耦合检查和项目已有的相关验证来确认可移植性，具体执行 [verification.md](references/verification.md)。

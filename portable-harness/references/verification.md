@@ -1,58 +1,26 @@
-# Verification and claims
+# 验证
 
-## Define required scope
+支持范围固定为：
 
-Build the support matrix from explicit project declarations or user confirmation. Do not infer required support from available machines or installed tools.
+- 操作系统：Windows、macOS、Linux；
+- agent：Codex、Claude。
 
-Use one row per required OS and agent combination. Record:
+不要创建 OS 版本、发行版或 OS × agent 验证矩阵。
 
-- OS name and version;
-- agent name and version;
-- source of the requirement;
-- official mechanism evidence;
-- project verification evidence;
-- commit and workspace state;
-- verification date.
+## 验证契约
 
-Use these orthogonal fields:
+1. **Canonical workflow：**共享行为只有一个 canonical body，adapter 不包含重复的工作流规则。
+2. **Agent discovery：**Codex 和 Claude 的项目本地 adapter 使用各自的原生 discovery 机制，并加载完整 canonical body。
+3. **平台中立性：**harness 自动化不包含 `.ps1`、`.bat`、`.cmd`、`.sh` 入口，也不包含依赖 shell 的 quoting、硬编码路径分隔符、可执行位假设、链接要求或 OS 专属进程控制。
+4. **项目验证：**运行项目已有的相关检查、测试、构建或 hook，其影响必须处于已批准的任务范围内。
 
-| Field | Values |
-| --- | --- |
-| `requirement` | `required`, `optional`, `out-of-scope` |
-| `capability` | `supported`, `unsupported`, `unknown` |
-| `verification` | `verified`, `unverified`, `not-applicable` |
+Agent discovery 与操作系统可移植性分开检查。不要在每个操作系统上重复每个 agent 检查。
 
-Valid combinations are: supported with verified or unverified; unsupported with not-applicable; unknown with unverified; out-of-scope with not-applicable.
+## 报告
 
-## Verify in layers
+报告以下内容：
 
-1. **Static contract:** canonical source, thin adapters, instruction ownership, platform-neutral automation, and checker coverage where applicable.
-2. **Agent behavior:** each required matrix cell discovers its adapter and completely loads the canonical workflow.
-3. **Project validation:** run the exact CI, test, build, or hook entrypoints required by the target project after classifying and authorizing their side effects.
-
-Do not substitute static inspection or vendor documentation for real agent behavior.
-
-## Report result state
-
-Use two fields:
-
-| Field | Values |
-| --- | --- |
-| `implementation` | `audit-only`, `applied`, `partial` |
-| `verification` | `complete`, `conditional`, `blocked` |
-
-Use `conditional` when the mechanism appears viable but required evidence is incomplete. Use `blocked` for required unsupported combinations, unresolved authority or trade-offs, failed partial implementation that prevents progress, or a missing required mechanism. Include the reason and recovery condition.
-
-`partial` implementation cannot have `complete` verification.
-
-## Limit claims
-
-When verification is not complete, report only the specific structure, checks, or matrix cells verified. Do not use a general `harness verified` claim.
-
-- Use `project harness verified` only when all required matrix cells and required project validation are complete.
-- Use `cross-agent harness verified for <scope>` only when every required combination in that explicit scope is verified and the scope contains at least two different agents.
-- Use `cross-OS harness verified for <scope>` only when every required combination in that explicit scope is verified and the scope contains at least two different operating systems.
-- Use `portable cross-system, cross-agent harness verified` only when the complete required matrix is verified and contains at least two different agents and two different operating systems.
-
-List all unverified or out-of-scope combinations. Bind every claim to the recorded versions, repository state, and evidence date.
-
+- Codex 和 Claude adapter 是否能够 discovery 并加载 canonical workflow；
+- 剩余的平台特化 harness 文件或假设；
+- 相关项目验证命令及结果；
+- 无法检查的具体项目。
