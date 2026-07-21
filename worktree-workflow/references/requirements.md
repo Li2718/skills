@@ -5,7 +5,7 @@ These are behavior requirements. A project may use any implementation that satis
 ## Commands and runtime
 
 - **DEV-1 Default entrypoint:** Provide one project-native default development command. Prefer `pnpm dev` only for a pnpm project.
-- **DEV-2 Command surface:** Provide or map project-native entrypoints for dev, restart, stop, status/list, clean, test, isolated start, isolated restart, isolated reset, logs, dependency services, and worktree integration when applicable.
+- **DEV-2 Command surface:** Provide or map project-native entrypoints for dev, restart, stop, status/list, worktree cleanup/removal, test, isolated start, isolated restart, isolated reset, logs, dependency services, and worktree integration when applicable.
 - **DEV-3 Supported operations only:** Run local development and integration operations only through supported entrypoints. If one fails or lacks capability, stop and report the command, key output, diagnosis, and proposed change; change it only after explicit approval.
 - **DEV-4 Complete session:** Start every component required for a usable development session. If the repository has multiple mutually exclusive development profiles and no declared default, stop and ask the user to choose.
 - **DEV-5 Reload:** Use mature project-native hot reload, watch, or automatic rebuild capabilities when available.
@@ -47,7 +47,7 @@ Apply this section only when the project has persistent development state or dep
 - **LIFE-5 Stop behavior:** Stop the owned runtime and its descendants safely, allow required work to drain, release endpoints and references, and preserve durable data unless an explicit destructive command says otherwise.
 - **LIFE-6 Failure recovery:** A partial start or restart must clean newly created resources and must not leave an unhealthy runtime registered as reusable. Preserve or restore the previous healthy runtime when the project can do so safely.
 - **LIFE-7 Active-use safety:** Clean, reset, migration, and other destructive operations must reject or safely coordinate with live references before changing data or services.
-- **LIFE-8 Clean:** Clean removes only the current worktree's runtime state, disposable artifacts, and isolated state. Ordinary clean never removes shared durable state. Main/owner-worktree clean requires interactive confirmation; non-interactive use requires an explicit confirmation flag. Any shared-data deletion requires a separate explicit destructive entrypoint.
+- **LIFE-8 Worktree cleanup:** Route cleanup and removal requests through one project-native operation. Remove the target worktree, its checked-out branch, and all associated workflow-owned runtime state, disposable artifacts, isolated state, endpoints, locks, logs, references, and managed resources. Preserve shared durable state and adopted external resources. Reject removal of the integration-target worktree or active shared-state owner.
 
 ## Test isolation
 
@@ -63,7 +63,8 @@ Apply this section only when the project has persistent development state or dep
 - **MERGE-3 Fast-forward first:** Integrate with fast-forward only unless the user explicitly requests a merge commit.
 - **MERGE-4 Rebase path:** If the captured target is not an ancestor of the source, rebase the source onto that captured target, stop on conflict or ambiguity, then rerun CI against the rebased SHA before fast-forwarding.
 - **MERGE-5 Stop conditions:** Stop and report on dirty state, detached HEAD, inspection failure, unclear relationships, conflicts, concurrent movement, CI failure, or human judgment. Never substitute an ordinary merge commit.
-- **MERGE-6 Cleanup semantics:** Define temporary CI/worktree cleanup separately from optional source branch or worktree removal. Required pre-merge cleanup failure blocks integration; post-merge cleanup failure must report that integration succeeded but cleanup remains incomplete.
+- **MERGE-6 Conditional cleanup:** Preserve the source worktree and branch unless cleanup is part of the integration request. When cleanup is requested, run the worktree cleanup operation after the target update. Report a successful target update and incomplete cleanup if that operation fails.
+- **MERGE-7 Final location:** After integration without cleanup, return to the source worktree before running subsequent commands or reporting completion. After integration with cleanup, remain in the target worktree.
 
 ## Project instructions and skills
 

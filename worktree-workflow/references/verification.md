@@ -48,7 +48,7 @@ Record each applicable requirement as `passed`, `failed`, `blocked`, or `unverif
 | `LIFE-5` | Stop a runtime with child processes or in-flight work; prove bounded graceful behavior, descendant cleanup, endpoint release, reference release, and data preservation. |
 | `LIFE-6` | Inject safe failures during start and restart; prove partial resources are removed, unhealthy state is not reusable, and the prior healthy runtime is preserved or the documented limitation was approved. |
 | `LIFE-7` | Attempt clean, reset, and migration while another live runtime references the target; prove rejection or safe coordination. |
-| `LIFE-8` | Prove non-owner clean removes only its runtime/disposable/isolated state; owner clean refuses without confirmation and needs an explicit non-interactive flag. Prove ordinary clean never deletes shared durable state. |
+| `LIFE-8` | Invoke cleanup and removal through their supported request surfaces and prove both use the same operation. Prove it removes the target worktree, branch, and every associated workflow-owned temporary resource while preserving shared durable state and adopted external resources. Prove it rejects the integration target and active shared-state owner. |
 
 ## Tests
 
@@ -68,7 +68,8 @@ Use disposable branches and worktrees for state-changing validation.
 | `MERGE-2`, `MERGE-3` | Prove CI runs against the captured source SHA and only that SHA fast-forwards. Move source or target during CI and immediately before target update; prove the atomic guard blocks integration. |
 | `MERGE-4` | Create a non-fast-forward relationship, rebase onto the captured target, rerun CI against the rebased SHA, then fast-forward. Prove conflicts stop. |
 | `MERGE-5` | Prove CI failure, concurrent movement, and ambiguity stop without an ordinary merge commit. |
-| `MERGE-6` | Inject temporary pre-merge and post-merge cleanup failures; prove the target remains unchanged for a failed gate and that post-merge failure reports successful integration plus incomplete cleanup. |
+| `MERGE-6` | Integrate once without cleanup and prove the source worktree and branch remain. Integrate once with cleanup and prove the source worktree, branch, and associated temporary resources are removed. Inject cleanup failure and prove it reports a successful target update plus incomplete cleanup. |
+| `MERGE-7` | Prove integration without cleanup runs the next command and completion report from the source worktree. Prove integration with cleanup leaves the next command and completion report in the target worktree. |
 
 ## Project rules and final state
 
