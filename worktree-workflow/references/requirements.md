@@ -14,6 +14,18 @@ These are behavior requirements. A project may use any implementation that satis
 - **DEV-8 Worktree isolation:** Each runtime must execute the current worktree's code and must not be corrupted by another worktree's generated files, dependency environment, build output, cache, image tag, or equivalent mutable artifacts.
 - **DEV-9 Cross-platform automation:** Workflow automation must run on every required operating system. Do not introduce `.sh`, `.bash`, `.zsh`, `.fish`, `.ps1`, `.bat`, or `.cmd` workflow entrypoints. Use structured subprocess arguments and portable filesystem, process, signal, and locking APIs.
 
+## Repository worktree locks
+
+- **LOCK-1 Shared location:** Store lock state under the repository's Git common directory. Resolve that directory through Git so every worktree and every Codex or Claude session shares one lock namespace without cross-session queries.
+- **LOCK-2 Command surface:** Provide `acquire`, `renew`, `status`, and `release` through the canonical skill's cross-platform runtime. Resolve the runtime relative to the canonical skill and do not require a project-specific package manager or hardcoded project path.
+- **LOCK-3 Lease ownership:** Use owner-labelled, token-controlled leases with explicit expiry. Only the matching token may renew or release an active lease. Allow a new owner to reclaim an expired lease.
+- **LOCK-4 Waiting:** Let acquisition wait and poll for valid conflicting leases, with an optional timeout. Never delete, overwrite, or bypass another owner's valid lease.
+- **LOCK-5 Group acquisition:** Acquire every requested worktree in a stable order as one group. If any target cannot be acquired, release every lock created by that attempt. Integration must acquire the source and target worktrees together before changing either.
+- **LOCK-6 Mutation gate:** Hold the corresponding worktree lease before changing tracked files, the index, commits, HEAD, refs, checked-out branches, or worktree registration. Renew immediately before each state-changing command and during long operations; stop when renewal fails.
+- **LOCK-7 Recovery:** Recover abandoned expired leases automatically. Treat missing, malformed, or schema-invalid lock records as damaged initialization and reclaim them only after a bounded grace period that prevents racing a live initializer.
+- **LOCK-8 Authorization boundary:** A lease coordinates workspace access only. It does not authorize commit, integration, push, cleanup, destructive changes, or any action requiring user approval.
+- **LOCK-9 Canonical ownership:** Keep the locking protocol, runtime, and behavior rules in one canonical skill package. Codex and Claude discovery adapters must load that same package without duplicating its rules.
+
 ## Endpoints
 
 Apply this section only when runtimes expose host-bound ports, sockets, pipes, or equivalent endpoints.
@@ -41,7 +53,7 @@ Apply this section only when the project has persistent development state or dep
 ## State and service lifecycle
 
 - **LIFE-1 Live references:** Count references from live runtimes to shared and isolated state or services. Recover stale references after crashes, host restarts, damaged state, or worktree removal using actual instance identity rather than a state file alone.
-- **LIFE-2 Concurrent operations:** Prevent startup, endpoint allocation, migration, seed, backup, reset, restore, stop, clean, and reference updates from racing into an unsafe state.
+- **LIFE-2 Concurrent operations:** Use repository worktree leases together with resource-specific coordination to prevent startup, endpoint allocation, migration, seed, backup, reset, restore, stop, clean, and reference updates from racing into an unsafe state.
 - **LIFE-3 Ownership:** Distinguish workflow-owned resources from adopted external resources. Releasing the last workflow reference must not stop a resource owned elsewhere.
 - **LIFE-4 Automatic stop:** When the last live reference to a workflow-owned managed service disappears, stop the service automatically and preserve durable data. File-only state has no service to stop but still participates in safety checks.
 - **LIFE-5 Stop behavior:** Stop the owned runtime and its descendants safely, allow required work to drain, release endpoints and references, and preserve durable data unless an explicit destructive command says otherwise.
@@ -58,7 +70,7 @@ Apply this section only when the project has persistent development state or dep
 
 ## Worktree integration
 
-- **MERGE-1 Preflight:** Before integration, verify both worktrees are clean, attached to clear named branches, and on the expected source/target relationship. Report branches, source and target SHAs, ahead/behind counts, and commit differences.
+- **MERGE-1 Preflight:** Acquire the source and target worktree leases as one group, then verify both worktrees are clean, attached to clear named branches, and on the expected source/target relationship. Report branches, source and target SHAs, ahead/behind counts, and commit differences.
 - **MERGE-2 Exact CI:** Run the project's required CI against the exact source SHA. Recheck source and target after CI and ensure the final target update still expects the captured target SHA or has an equivalent atomic guard.
 - **MERGE-3 Fast-forward first:** Integrate with fast-forward only unless the user explicitly requests a merge commit.
 - **MERGE-4 Rebase path:** If the captured target is not an ancestor of the source, rebase the source onto that captured target, stop on conflict or ambiguity, then rerun CI against the rebased SHA before fast-forwarding.
@@ -70,5 +82,5 @@ Apply this section only when the project has persistent development state or dep
 
 - **RULE-1 Ownership model:** Follow the repository's existing instruction, documentation, and skill ownership model. Do not force a particular skill split or directory layout.
 - **RULE-2 Rule placement:** When project skills exist, place worktree requirements in the appropriate canonical skill or skills, with triggers covering the operations they govern. Keep tool discovery adapters thin and do not duplicate skill rules into shared project instructions.
-- **RULE-3 Required agent behavior:** Persist the supported-entrypoint, failure-reporting, untracked-file ownership, isolated-data, test-isolation, and CI-before-fast-forward rules where the project's agents will apply them.
+- **RULE-3 Required agent behavior:** Persist the shared-lock acquisition and renewal gate, supported-entrypoint, failure-reporting, untracked-file ownership, isolated-data, test-isolation, and CI-before-fast-forward rules where the project's agents will apply them.
 - **RULE-4 Relocatability:** Do not write machine-specific absolute paths into repository rules, scripts, state formats, or documentation.

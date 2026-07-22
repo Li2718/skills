@@ -18,6 +18,17 @@ Record each applicable requirement as `passed`, `failed`, `blocked`, or `unverif
 | `DEV-3` | Trigger a safe script failure or use an isolated fixture; prove the agent/workflow reports it and does not bypass the entrypoint. |
 | `DEV-4` | Inventory required components and profiles; prove the chosen default is declared or explicitly approved. |
 
+## Repository worktree locks
+
+| Requirements | Evidence |
+|---|---|
+| `LOCK-1`, `LOCK-2`, `LOCK-9` | Resolve the lock root from two real worktrees and prove both use the same Git common directory. Inspect the canonical runtime and Codex/Claude adapters for project paths, package-manager assumptions, duplicated rules, and platform-specific entrypoints. |
+| `LOCK-3`, `LOCK-4` | Acquire with one owner and prove another owner cannot acquire, renew, release, delete, or bypass the valid lease. Release or expire the first lease and prove waiting acquisition proceeds. |
+| `LOCK-5` | Hold one target, request that target with a free target as a group, and prove failure rolls back every lock created by the attempt without disturbing the existing owner. Repeat with source and target worktrees used for integration. |
+| `LOCK-6` | Exercise supported mutation and integration workflows and prove acquisition and successful renewal precede every tracked-file, index, commit, ref, branch, and worktree-registration change. Prove renewal failure stops mutation. |
+| `LOCK-7` | Prove expired leases are reclaimed. Race two reclaiming owners and prove the winner's new lease remains valid. Inject missing, malformed, and schema-invalid records; prove they block during the grace period and recover afterward. |
+| `LOCK-8` | Prove acquiring a lease does not trigger or authorize commit, integration, push, cleanup, or another protected operation. |
+
 ## Runtime, artifacts, and endpoints
 
 | Requirements | Evidence |
@@ -64,7 +75,7 @@ Use disposable branches and worktrees for state-changing validation.
 
 | Requirements | Evidence |
 |---|---|
-| `MERGE-1` | Prove dirty, detached, wrong-target, ambiguous, and inspection-failure preflight rejection; inspect reported SHAs, ahead/behind, and commit differences. |
+| `MERGE-1` | Prove source and target leases are acquired together before preflight. Prove dirty, detached, wrong-target, ambiguous, and inspection-failure rejection; inspect reported SHAs, ahead/behind, and commit differences. |
 | `MERGE-2`, `MERGE-3` | Prove CI runs against the captured source SHA and only that SHA fast-forwards. Move source or target during CI and immediately before target update; prove the atomic guard blocks integration. |
 | `MERGE-4` | Create a non-fast-forward relationship, rebase onto the captured target, rerun CI against the rebased SHA, then fast-forward. Prove conflicts stop. |
 | `MERGE-5` | Prove CI failure, concurrent movement, and ambiguity stop without an ordinary merge commit. |

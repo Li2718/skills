@@ -1,4 +1,4 @@
 interface:
   display_name: "Worktree Workflow"
-  short_description: "Define and verify safe multi-worktree project requirements"
-  default_prompt: "Use $worktree-workflow to audit or establish this project's multi-worktree development workflow."
+  short_description: "Coordinate and verify safe multi-worktree development"
+  default_prompt: "Use $worktree-workflow to coordinate repository worktree locks and apply the project's multi-worktree workflow."

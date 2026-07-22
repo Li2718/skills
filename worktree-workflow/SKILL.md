@@ -1,6 +1,6 @@
 ---
 name: worktree-workflow
-description: Establish, audit, operate, change, and verify a project-local workflow for concurrent git worktrees in any technology stack. Use for worktree-aware dev, restart, stop, cleanup, removal, shared or isolated state, endpoint allocation, test isolation, runtime lifecycle, or CI-gated integration back to the primary branch, including when reviewing the project instructions and skills that govern those operations.
+description: Establish, audit, operate, change, and verify a project-local workflow for concurrent git worktrees in any technology stack. Use for worktree-aware locking, edits, dev, restart, stop, cleanup, removal, shared or isolated state, endpoint allocation, test isolation, runtime lifecycle, or CI-gated integration back to the primary branch, including when reviewing the project instructions and skills that govern those operations.
 ---
 
 # Worktree Workflow
@@ -10,6 +10,7 @@ Apply a technology-neutral requirements contract to the target repository. Deriv
 ## Read references
 
 - Read [requirements.md](references/requirements.md) completely before auditing, operating, planning, changing, or verifying the workflow.
+- Read [locking.md](references/locking.md) before changing tracked files, the index, commits, branches, or worktrees.
 - Read [design-options.md](references/design-options.md) when choosing or assessing an implementation. Its mechanisms are recommendations, not extra requirements.
 - Read [verification.md](references/verification.md) before planning validation or claiming completion.
 
@@ -19,10 +20,11 @@ Apply a technology-neutral requirements contract to the target repository. Deriv
 2. **Classify.** Map every requirement ID to `applicable` or evidence-backed `N/A`. Identify the shared-state owner worktree and the integration target branch/worktree separately.
 3. **Audit.** Record existing coverage, gaps, supported entrypoints, and evidence without assuming that an entrypoint name proves its behavior.
 4. **Stop for decisions.** Discuss destructive operations, unsafe or lossy data copying, incompatible shared resources, missing cross-platform capability, ambiguous ownership or branch relationships, absent CI, failed scripts, and material trade-offs before proceeding.
-5. **Use supported commands.** Perform dev, service, test, cleanup/removal, and integration operations only through project-supported entrypoints.
-6. **Handle missing capability.** If an entrypoint fails or lacks required behavior, report the command, key output, diagnosis, and proposed entrypoint change. Implement the change only after explicit user approval; do not bypass it with hand-built process, service, container, database, server, kill, or merge commands.
-7. **Implement the approved scope.** Follow the project's runtime and naming conventions. Select mechanisms from repository evidence; use [design-options.md](references/design-options.md) only as guidance.
-8. **Verify and report.** Execute applicable scenarios from [verification.md](references/verification.md). After integration without cleanup, return to the source worktree. After integration with cleanup, run the worktree cleanup operation and remain in the target worktree. Then report changed files, command mappings, results by requirement ID, `N/A` evidence, unverified items, risks, and final Git/worktree/resource state.
+5. **Acquire repository locks.** Use [locking.md](references/locking.md) to lease every worktree that an operation may mutate. Acquire source and target worktrees together before integration. Wait for conflicting valid leases; never delete or bypass them.
+6. **Use supported commands.** Perform dev, service, test, cleanup/removal, and integration operations only through project-supported entrypoints. Renew the applicable lease immediately before each command that changes tracked files, the index, commits, branches, or worktrees.
+7. **Handle missing capability.** If an entrypoint or lock command fails or lacks required behavior, report the command, key output, diagnosis, and proposed change. Implement the change only after explicit user approval; do not bypass it with hand-built process, service, container, database, server, kill, lock deletion, or merge commands.
+8. **Implement the approved scope.** Follow the project's runtime and naming conventions. Select mechanisms from repository evidence; use [design-options.md](references/design-options.md) only as guidance.
+9. **Verify, release, and report.** Execute applicable scenarios from [verification.md](references/verification.md). After integration without cleanup, return to the source worktree. After integration with cleanup, run the worktree cleanup operation and remain in the target worktree. Release held leases after protected work and rollback or cleanup complete. Then report changed files, command mappings, results by requirement ID, `N/A` evidence, unverified items, risks, and final Git/worktree/resource state.
 
 ## Boundaries
 
@@ -30,3 +32,4 @@ Apply a technology-neutral requirements contract to the target repository. Deriv
 - Treat durable files, databases, caches, queues, emulators, object stores, and similar resources as state when present.
 - Treat servers, desktop apps, workers, schedulers, watchers, compilers, generators, and child processes as runtime components when present.
 - Never write machine-specific absolute paths into repository files.
+- Treat locks only as workspace coordination. Require separate user authorization for commit, integration, push, cleanup, and every other externally consequential operation.
