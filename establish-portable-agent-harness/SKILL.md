@@ -1,11 +1,11 @@
 ---
-name: portable-harness
-description: 审计、设计、迁移、维护和验证项目本地 AI 开发 harness，使其可由 Codex 和 Claude 在 Windows、macOS、Linux 上使用。适用于创建或修改共享 agent 指令、skill、discovery adapter、跨平台 harness 自动化、harness 检查的 CI 或 hook 集成，以及面向人的 AI 工具约定。
+name: establish-portable-agent-harness
+description: 为项目建立、审计、迁移、维护和验证本地 AI 开发 harness，使 Codex 和 Claude 可在 Windows、macOS、Linux 上使用。仅在创建或修改项目的共享 agent 指令、canonical skill、discovery adapter、跨平台 harness 自动化、harness CI 或 hook 集成及维护文档时使用。项目改造完成后的日常开发和项目内 skill 操作不属于此 skill。
 ---
 
-# Portable Harness
+# Establish Portable Agent Harness
 
-根据目标项目自身的约定构建 harness。保持可复用工作流只有一个 canonical body，可供 Codex 和 Claude 使用，并且不包含平台特化自动化。
+这是一个项目建设用元 skill。根据目标项目自身的约定建立或维护 harness；改造完成后的日常工作由项目内指令和 skill 承担。保持可复用工作流只有一个 canonical body，可供 Codex 和 Claude 使用，并且不包含平台特化自动化。
 
 ## 必读参考资料
 

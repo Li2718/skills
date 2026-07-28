@@ -15,17 +15,17 @@
 1. 指令比较模糊时（例如只说「审查一下」），可能会审查一些无关或不重要的内容。虽然 skill 要求 AI 向用户确认审查目标，但 AI 似乎经常绕过这项限制。这可能是因为它把「目标」理解为审查对象，而不是审查要求；审查对象往往本来就是清晰的。因此，发送指令时最好尽可能说清楚。
 2. 每轮查出的问题较少，需要经过多轮才能收敛。
 
-## portable-harness
+## establish-portable-agent-harness
 
 将任意项目改造成跨操作系统友好（例如不使用 `.bat` 等操作系统特定的脚本格式）、跨 Agent 友好（对 skill、项目规范等文件进行跨 Agent 管理，目前只支持 Codex 和 Claude Code）的项目。
 
-这是一个元 skill，不需要留在项目中。安装后告诉 AI `使用 portable-harness 将这个项目改造` 即可。改造完成后，这个 skill 就可以删除（我将它安装在全局环境中）。
+这是一个元 skill，不需要留在项目中。安装后告诉 AI `使用 establish-portable-agent-harness 将这个项目改造` 即可。改造完成后，这个 skill 就可以删除（我将它安装在全局环境中）。
 
-## worktree-workflow
+## establish-worktree-workflow
 
-用于建立和执行项目级多 worktree 工作流。它覆盖 worktree 租约锁、共享或隔离状态、端点分配、开发服务生命周期、测试隔离、清理，以及经过 CI 验证后集成回主分支等环节。
+用于为项目建立多 worktree 工作流及配套 skill。改造后的项目内 skill 覆盖 worktree 租约锁、共享或隔离状态、端点分配、开发服务生命周期、测试隔离、清理，以及经过 CI 验证后集成回主分支等环节。
 
-这是一个元 skill，不需要留在项目中。安装后告诉 AI `使用 worktree-workflow 将这个项目改造` 即可。改造完成后，这个 skill 就可以删除（我将它安装在全局环境中）。
+这是一个元 skill，不需要留在项目中。安装后告诉 AI `使用 establish-worktree-workflow 将这个项目改造` 即可。改造完成后，这个 skill 就可以删除（我将它安装在全局环境中）。
 
 改造后，进行修改时会自动新建 worktree。每个 worktree（包括主目录）在被操作时都会加锁；拿不到锁的会话将进入等待，避免产生竞态。在 worktree 中启动开发服务器时，如果没有修改数据库结构，就会复用主工作区的数据库；如果修改过，则会建立独立数据库。让 AI 清理 worktree 时，会自动清理相关分支、数据库等资源。worktree 使用的独立数据库不会自动同步回主库。
 

@@ -1,15 +1,15 @@
 ---
-name: worktree-workflow
-description: Establish, audit, operate, change, and verify a project-local workflow for concurrent git worktrees in any technology stack. Use for worktree-aware locking, edits, dev, restart, stop, cleanup, removal, shared or isolated state, endpoint allocation, test isolation, runtime lifecycle, or CI-gated integration back to the primary branch, including when reviewing the project instructions and skills that govern those operations.
+name: establish-worktree-workflow
+description: Establish, audit, migrate, maintain, and verify a target repository's project-local multi-worktree development workflow and companion skills. Use only when creating or changing project rules, skills, locking, dev and test isolation, state and endpoint handling, runtime lifecycle, cleanup, or CI integration capabilities. Do not use for routine edits, dev, restart, stop, test, cleanup, or integration after the project-local workflow exists; use the generated project-local skill instead.
 ---
 
-# Worktree Workflow
+# Establish Worktree Workflow
 
-Apply a technology-neutral requirements contract to the target repository. Derive implementation choices from that repository instead of copying another project's harness.
+This is a project-construction meta-skill. Apply a technology-neutral requirements contract to establish or maintain the target repository's project-local workflow and companion skills. After construction, route routine multi-worktree operations through the generated project-local skill. Derive implementation choices from the target repository instead of copying another project's harness.
 
 ## Read references
 
-- Read [requirements.md](references/requirements.md) completely before auditing, operating, planning, changing, or verifying the workflow.
+- Read [requirements.md](references/requirements.md) completely before auditing, planning, changing, or verifying the target project's workflow.
 - Read [locking.md](references/locking.md) before changing tracked files, the index, commits, branches, or worktrees.
 - Read [design-options.md](references/design-options.md) when choosing or assessing an implementation. Its mechanisms are recommendations, not extra requirements.
 - Read [verification.md](references/verification.md) before planning validation or claiming completion.

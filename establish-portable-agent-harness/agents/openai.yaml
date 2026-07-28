@@ -1,0 +1,4 @@
+interface:
+  display_name: "Establish Portable Agent Harness"
+  short_description: "Build a portable Codex and Claude project harness"
+  default_prompt: "Use $establish-portable-agent-harness to establish or update the cross-platform Codex and Claude harness in the target project."

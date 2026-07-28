@@ -1,0 +1,4 @@
+interface:
+  display_name: "Establish Worktree Workflow"
+  short_description: "Build a project-local multi-worktree workflow"
+  default_prompt: "Use $establish-worktree-workflow to establish or update the multi-worktree workflow and companion skills for the target repository."
