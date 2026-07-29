@@ -30,6 +30,7 @@ Record each applicable requirement as `passed`, `failed`, `blocked`, or `unverif
 | `LOCK-6` | Exercise supported mutation and integration workflows and prove acquisition and successful renewal precede every tracked-file, index, commit, ref, branch, and worktree-registration change. Prove renewal failure stops mutation. |
 | `LOCK-7` | Prove expired leases are reclaimed. Race two reclaiming owners and prove the winner's new lease remains valid. Inject missing, malformed, and schema-invalid records; prove they block during the grace period and recover afterward. |
 | `LOCK-8` | Prove acquiring a lease does not trigger or authorize commit, integration, push, cleanup, or another protected operation. |
+| `LOCK-10` | Acquire a group, retain its returned canonical identities, unregister and remove one target, then prove the token still renews from stored records. Selectively release the removed member by its retained identity and prove the remaining member stays leased. Request one unowned member together with an owned member and prove validation fails before either lease changes. |
 
 ## Runtime, artifacts, and endpoints
 
@@ -61,7 +62,10 @@ Record each applicable requirement as `passed`, `failed`, `blocked`, or `unverif
 | `LIFE-5` | Stop a runtime with child processes or in-flight work; prove bounded graceful behavior, descendant cleanup, endpoint release, reference release, and data preservation. |
 | `LIFE-6` | Inject safe failures during start and restart; prove partial resources are removed, unhealthy state is not reusable, and the prior healthy runtime is preserved or the documented limitation was approved. |
 | `LIFE-7` | Attempt clean, reset, and migration while another live runtime references the target; prove rejection or safe coordination. |
-| `LIFE-8` | Invoke cleanup and removal through their supported request surfaces and prove both use the same operation. Prove it removes the target worktree, branch, and every associated workflow-owned temporary resource while preserving shared durable state and adopted external resources. Prove it rejects the integration target and active shared-state owner. |
+| `LIFE-8` | Invoke cleanup, removal, retry, and recovery through every supported request surface and prove all route to one operation. Prove the happy path removes the target registration, directory, safe local branch, leases, and every associated workflow-owned temporary resource while preserving shared durable state and adopted external resources. Prove protected targets are rejected. |
+| `LIFE-9` | Inject failures before and after runtime cleanup, receipt publication, Git unregistration, directory removal, target-lease release, branch deletion, finalization marking, final lease release, and receipt removal. Prove each failure reports the completed phase, releases every lease held by the invocation unless a documented live subprocess still owns and renews it, retains valid recovery metadata until final lease release succeeds, and completes on rerun without repeating destructive work. Prove receipt removal is the final state-changing step. |
+| `LIFE-10` | Test nested read-only entries and transient sharing or deletion failures with bounded delays, including on Windows. Prove retries eventually remove the directory when the obstruction clears, never follow directory symlinks, and fail with the remaining path and last error after exhaustion. |
+| `LIFE-11` | With explicit authorization, adopt and remove an unregistered legacy residual inside the approved worktree root. Prove the operation rejects registered targets, paths outside that root, Git administration markers, missing authorization, and branch deletion based only on a directory name. |
 
 ## Tests
 

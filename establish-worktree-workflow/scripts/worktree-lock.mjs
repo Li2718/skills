@@ -24,9 +24,18 @@ function canonicalPath(value) {
   return fs.realpathSync.native(path.resolve(value));
 }
 
-function normalizedPath(value) {
-  const resolved = canonicalPath(value);
+function pathKey(value) {
+  const resolved = path.resolve(value);
   return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+}
+
+function normalizedPath(value) {
+  return pathKey(canonicalPath(value));
+}
+
+function leasePathKey(value) {
+  const resolved = path.resolve(value);
+  return fs.existsSync(resolved) ? normalizedPath(resolved) : pathKey(resolved);
 }
 
 function lockRef(worktree) {
@@ -144,6 +153,15 @@ function createRecord({ owner, token, worktree, leaseMs, now, acquiredAt }) {
     token,
     worktree: canonicalPath(worktree),
     acquiredAt: acquiredAt ?? new Date(now).toISOString(),
+    renewedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + leaseMs).toISOString(),
+    expiresAtMs: now + leaseMs,
+  };
+}
+
+function renewRecord(record, leaseMs, now) {
+  return {
+    ...record,
     renewedAt: new Date(now).toISOString(),
     expiresAt: new Date(now + leaseMs).toISOString(),
     expiresAtMs: now + leaseMs,
@@ -280,14 +298,7 @@ export function renewToken({ lockRoot, token, leaseMs = DEFAULT_LEASE_MS, now = 
   }
 
   return entries.map(({ ref, oid, record }) => {
-    const renewed = createRecord({
-      owner: record.owner,
-      token,
-      worktree: record.worktree,
-      leaseMs,
-      now,
-      acquiredAt: record.acquiredAt,
-    });
+    const renewed = renewRecord(record, leaseMs, now);
     const renewedOid = writeRecord(lockRoot, renewed);
     if (!compareAndSwap(lockRoot, ref, renewedOid, oid)) {
       throw new Error(`lease changed during renewal: ${record.worktree}`);
@@ -296,10 +307,26 @@ export function renewToken({ lockRoot, token, leaseMs = DEFAULT_LEASE_MS, now = 
   });
 }
 
-export function releaseToken({ lockRoot, token }) {
+export function releaseToken({ lockRoot, token, worktrees }) {
   if (!token) throw new Error("--token is required");
+  const selected = Array.isArray(worktrees) && worktrees.length > 0
+    ? new Set(worktrees.map(leasePathKey))
+    : null;
+  const entries = listLockRefs(lockRoot).map((ref) => {
+    const oid = readRef(lockRoot, ref);
+    return { ref, record: oid ? readRecord(lockRoot, oid) : null };
+  });
+  const owned = entries.filter(({ record }) => record?.token === token && record.worktree);
+  if (selected) {
+    const held = new Set(owned.map(({ record }) => leasePathKey(record.worktree)));
+    const missing = [...selected].filter((worktree) => !held.has(worktree));
+    if (missing.length > 0) {
+      throw new Error(`token does not hold requested worktree locks: ${missing.join(", ")}`);
+    }
+  }
   const released = [];
-  for (const ref of listLockRefs(lockRoot)) {
+  for (const { ref, record } of owned) {
+    if (selected && !selected.has(leasePathKey(record.worktree))) continue;
     const worktree = releaseOwnedRef(lockRoot, ref, token);
     if (worktree) released.push(worktree);
   }
@@ -345,6 +372,12 @@ export function resolveTargets(context, values, includeMain, cwd = process.cwd()
     if (!worktree) throw new Error(`not a registered git worktree: ${item}`);
     return [key, worktree];
   })).values()];
+}
+
+function resolveReleaseTargets(context, values, includeMain, cwd = process.cwd()) {
+  const requested = values.map((item) => path.resolve(cwd, item));
+  if (includeMain) requested.push(context.mainWorktree);
+  return [...new Map(requested.map((item) => [leasePathKey(item), item])).values()];
 }
 
 function sleep(ms) {
@@ -421,7 +454,7 @@ function usage() {
   node <skill-root>/scripts/worktree-lock.mjs acquire --owner <task> [--worktree <path>] [--main] [--wait]
   node <skill-root>/scripts/worktree-lock.mjs renew --token <token> [--lease-ms <ms>]
   node <skill-root>/scripts/worktree-lock.mjs status [--worktree <path>] [--main]
-  node <skill-root>/scripts/worktree-lock.mjs release --token <token>
+  node <skill-root>/scripts/worktree-lock.mjs release --token <token> [--worktree <path>] [--main]
 
 Defaults: current worktree, 30-minute lease, 2-second polling, unlimited wait. A zero timeout means unlimited wait.`;
 }
@@ -470,7 +503,12 @@ async function main() {
     const worktrees = resolveTargets(context, options.worktrees, options.main);
     console.log(JSON.stringify(lockStatus({ lockRoot: context.lockRoot, worktrees }), null, 2));
   } else if (command === "release") {
-    console.log(JSON.stringify({ released: releaseToken({ lockRoot: context.lockRoot, token: options.token }) }, null, 2));
+    const selected = options.worktrees.length > 0 || options.main
+      ? resolveReleaseTargets(context, options.worktrees, options.main)
+      : undefined;
+    console.log(JSON.stringify({
+      released: releaseToken({ lockRoot: context.lockRoot, token: options.token, worktrees: selected }),
+    }, null, 2));
   } else {
     throw new Error(`unknown command: ${command}`);
   }

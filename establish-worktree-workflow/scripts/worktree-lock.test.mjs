@@ -54,6 +54,14 @@ function runCliAsync(cwd, args) {
   });
 }
 
+function runCli(cwd, args) {
+  return JSON.parse(execFileSync(process.execPath, [scriptPath, ...args], {
+    cwd,
+    encoding: "utf8",
+    windowsHide: true,
+  }));
+}
+
 function repositoryFixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "worktree-lock-repo-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -157,6 +165,37 @@ test("renew extends every lease held by a token", (t) => {
   const renewed = renewToken({ lockRoot, token: "merge-token", leaseMs: 500, now: 1_050 });
   assert.equal(renewed.length, 2);
   assert.deepEqual(renewed.map((record) => record.expiresAtMs), [1_550, 1_550]);
+});
+
+test("a group token renews and selectively releases after a worktree directory is removed", (t) => {
+  const { root, lockRoot, first, second } = directoryFixture(t);
+  tryAcquireGroup({ lockRoot, owner: "cleanup", token: "cleanup-token", worktrees: [first, second], now: 1_000 });
+  fs.rmSync(first, { recursive: true, force: true });
+
+  assert.equal(renewToken({ lockRoot, token: "cleanup-token", now: 1_100 }).length, 2);
+  assert.throws(
+    () => releaseToken({
+      lockRoot,
+      token: "cleanup-token",
+      worktrees: [first, path.join(root, "not-owned")],
+    }),
+    /token does not hold requested worktree locks/,
+  );
+  assert.equal(renewToken({ lockRoot, token: "cleanup-token", now: 1_200 }).length, 2);
+  assert.deepEqual(releaseToken({ lockRoot, token: "cleanup-token", worktrees: [first] }), [first]);
+  assert.deepEqual(renewToken({ lockRoot, token: "cleanup-token", now: 1_300 }).map((record) => record.worktree), [second]);
+  assert.deepEqual(releaseToken({ lockRoot, token: "cleanup-token" }), [second]);
+});
+
+test("the CLI renews and selectively releases a group after Git unregisters one worktree", (t) => {
+  const { repository, feature } = repositoryFixture(t);
+  const acquired = runCli(feature, ["acquire", "--owner", "cleanup", "--worktree", feature, "--main"]);
+  runGit(repository, ["worktree", "remove", feature]);
+
+  assert.deepEqual(new Set(runCli(repository, ["renew", "--token", acquired.token]).renewed), new Set([repository, feature]));
+  assert.deepEqual(runCli(repository, ["release", "--token", acquired.token, "--worktree", feature]).released, [feature]);
+  assert.equal(runCli(repository, ["status", "--main"])[0].state, "active");
+  assert.deepEqual(runCli(repository, ["release", "--token", acquired.token, "--main"]).released, [repository]);
 });
 
 test("release removes only locks held by its token", (t) => {
