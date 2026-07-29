@@ -17,7 +17,8 @@ Record each applicable requirement as `passed`, `failed`, `blocked`, or `unverif
 | `DEV-1` to `DEV-5`, `TEST-1` | Map the actual default and semantic entrypoints; start a usable session and demonstrate project-native reload/watch behavior where applicable. |
 | `DEV-3` | Trigger a safe script failure or use an isolated fixture; prove the agent/workflow reports it and does not bypass the entrypoint. |
 | `DEV-4` | Inventory required components and profiles; prove the chosen default is declared or explicitly approved. |
-| `DEV-10` | Start from a session already using a compatible attached worktree, request an edit, and prove the workflow reuses it without creating another worktree. Exercise each allowed exception and prove creation is preceded by the specific reason or an explicit isolation request. |
+| `DEV-10` | Start from a session already using an attached worktree, request an edit, and prove the workflow reuses it without creating another worktree. Exercise each allowed exception and prove creation is preceded by the specific reason or an explicit isolation request. |
+| `DEV-11` | In one fixture with an existing worktree-location convention, prove the workflow follows it. In another fixture without a convention, prove it adds `/.worktree/` to the repository-root `.gitignore` before creating `<main-worktree-root>/.worktree/<name>`, and prove the main worktree remains clean afterward. |
 
 ## Repository worktree locks
 
